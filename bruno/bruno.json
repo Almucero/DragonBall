@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "tasks",
+  "name": "DragonBall",
   "type": "collection",
   "ignore": [
     "node_modules",

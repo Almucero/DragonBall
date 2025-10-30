@@ -1,0 +1,22 @@
+meta {
+  name: get raw transformations
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:1337/api/transformations/raw
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page: 
+  ~populate: image
+  ~populate: character
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

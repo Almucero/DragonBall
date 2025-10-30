@@ -1,13 +1,17 @@
 meta {
   name: get transformations
   type: http
-  seq: 2
+  seq: 1
 }
 
 get {
   url: http://localhost:1337/api/transformations
   body: none
   auth: inherit
+}
+
+params:query {
+  ~page: 
 }
 
 settings {

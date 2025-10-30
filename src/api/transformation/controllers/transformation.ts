@@ -22,7 +22,6 @@ const getImageUrl = (image: any) => {
 export default factories.createCoreController(
   "api::transformation.transformation",
   ({ strapi }) => ({
-
     // === GET /api/transformations ===
     async raw(ctx) {
       const query = ctx.query as Record<string, any>;
@@ -34,7 +33,7 @@ export default factories.createCoreController(
         strapi.entityService.findMany("api::transformation.transformation", {
           start,
           limit,
-          sort: { uid: 'asc' },
+          sort: { uid: "asc" },
           populate: ["image"],
         }),
         strapi.db.query("api::transformation.transformation").count(),
@@ -48,14 +47,14 @@ export default factories.createCoreController(
         deletedAt: e.deletedAt ?? null,
       }));
 
-      const totalPages = Math.ceil(total / limit);
+      const totalPages = Math.ceil(total / 2 / limit);
       const baseUrl = `${ctx.request.origin}/api/transformations`;
       const makeLink = (p: number) => `${baseUrl}?page=${p}&limit=${limit}`;
 
       ctx.body = {
         items,
         meta: {
-          totalItems: total,
+          totalItems: total / 2,
           itemCount: items.length,
           itemsPerPage: limit,
           totalPages,
@@ -74,13 +73,15 @@ export default factories.createCoreController(
     async rawOne(ctx) {
       const { id } = ctx.params as { id: string };
 
-      const entity = await strapi.db.query("api::transformation.transformation").findOne({
-        where: { uid: Number(id) },
-        populate: {
-          image: true,
-          character: { populate: ["image"] },
-        },
-      });
+      const entity = await strapi.db
+        .query("api::transformation.transformation")
+        .findOne({
+          where: { uid: Number(id) },
+          populate: {
+            image: true,
+            character: { populate: ["image"] },
+          },
+        });
 
       if (!entity) {
         ctx.status = 404;
@@ -111,6 +112,91 @@ export default factories.createCoreController(
         deletedAt: entity.deletedAt ?? null,
         character,
       };
+    },
+
+    // Expose the original/core behavior explicitly
+    async originalFind(ctx) {
+      const query = ctx.query as Record<string, any>;
+      const page = Number(query.page) || 1;
+      const limit = Number(query.limit) || 10;
+      const start = (page - 1) * limit;
+
+      let populate: any = undefined;
+      if (query.populate) {
+        if (typeof query.populate === "string") {
+          populate = query.populate.includes(",")
+            ? query.populate.split(",").map((s: string) => s.trim())
+            : query.populate;
+        } else {
+          populate = query.populate;
+        }
+      }
+
+      const [entities, total] = await Promise.all([
+        strapi.entityService.findMany("api::transformation.transformation", {
+          start,
+          limit,
+          sort: { uid: "asc" },
+          populate,
+        }),
+        strapi.db.query("api::transformation.transformation").count(),
+      ]);
+
+      const totalPages = Math.ceil(total / (limit || total));
+
+      ctx.body = {
+        data: entities,
+        meta: {
+          pagination: {
+            page,
+            pageSize: limit,
+            pageCount: totalPages,
+            total,
+          },
+        },
+      };
+    },
+
+    async originalFindOne(ctx) {
+      const { id } = ctx.params as { id: string };
+      const query = ctx.query as Record<string, any>;
+
+      let populate: any = undefined;
+      if (query.populate) {
+        if (typeof query.populate === "string") {
+          populate = query.populate.includes(",")
+            ? query.populate.split(",").map((s: string) => s.trim())
+            : query.populate;
+        } else {
+          populate = query.populate;
+        }
+      }
+
+      const numericId = Number(id);
+      const orFilters: any[] = [{ documentId: id }];
+      if (Number.isFinite(numericId)) {
+        orFilters.push({ uid: numericId });
+        orFilters.push({ id: numericId });
+      }
+
+      const results = await strapi.entityService.findMany(
+        "api::transformation.transformation",
+        {
+          filters: { $or: orFilters },
+          populate,
+          limit: 1,
+        }
+      );
+
+      const entity = results[0] ?? null;
+
+      if (!entity) {
+        ctx.status = 404;
+        ctx.body = { message: "Transformation not found" };
+        return;
+      }
+
+      ctx.body = { data: entity };
     },
   })
 );

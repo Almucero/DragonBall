@@ -1,17 +1,19 @@
 meta {
-  name: get characters
+  name: get raw planets
   type: http
-  seq: 1
+  seq: 3
 }
 
 get {
-  url: http://localhost:1337/api/characters
+  url: http://localhost:1337/api/planets/raw
   body: none
   auth: inherit
 }
 
 params:query {
   ~page: 
+  ~populate: image
+  ~populate: characters
 }
 
 settings {

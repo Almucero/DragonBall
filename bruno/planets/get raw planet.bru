@@ -1,0 +1,21 @@
+meta {
+  name: get raw planet
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:1337/api/planets/raw/lq4rx9sxorkw28moyr5rbw28
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~populate: image
+  ~populate: characters
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

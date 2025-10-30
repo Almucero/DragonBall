@@ -1,0 +1,22 @@
+meta {
+  name: get raw character
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:1337/api/characters/raw/g9bsj3wj69d3r65nw90987zx
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~populate: image
+  ~populate: originPlanet
+  ~populate: transformations
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

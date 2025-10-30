@@ -1,13 +1,13 @@
 /**
  * planet controller (original)
- */ 
+ */
 // import { factories } from '@strapi/strapi'
 
 // export default factories.createCoreController('api::planet.planet');
 
 /**
  * planet controller (modificado)
- */ 
+ */
 import { factories } from "@strapi/strapi";
 
 const getImageUrl = (image: any) => {
@@ -32,13 +32,13 @@ export default factories.createCoreController(
         strapi.entityService.findMany("api::planet.planet", {
           start,
           limit,
-          sort: { uid: 'asc' },
+          sort: { uid: "asc" },
         }),
         strapi.db.query("api::planet.planet").count(),
       ]);
 
       const items = entities.map((e: any) => ({
-        id: e.uid,
+        id: e.uid ?? e.id,
         name: e.name,
         isDestroyed: e.isDestroyed,
         description: e.description,
@@ -46,14 +46,14 @@ export default factories.createCoreController(
         deletedAt: e.deletedAt ?? null,
       }));
 
-      const totalPages = Math.ceil((total/2) / limit);
+      const totalPages = Math.ceil(total / 2 / limit);
       const baseUrl = `${ctx.request.origin}/api/planets`;
       const makeLink = (p: number) => `${baseUrl}?page=${p}&limit=${limit}`;
 
       ctx.body = {
         items,
         meta: {
-          totalItems: total/2,
+          totalItems: total / 2,
           itemCount: items.length,
           itemsPerPage: limit,
           totalPages,
@@ -70,28 +70,28 @@ export default factories.createCoreController(
 
     async rawOne(ctx) {
       const { id } = ctx.params as { id: string };
-    
-      const entity = await strapi.db.query('api::planet.planet').findOne({
+
+      const entity = await strapi.db.query("api::planet.planet").findOne({
         where: { uid: Number(id) },
         populate: {
           image: true,
-          characters: { populate: ['image'] },
+          characters: { populate: ["image"] },
         },
       });
-    
+
       if (!entity) {
         ctx.status = 404;
-        ctx.body = { message: 'Planet not found' };
+        ctx.body = { message: "Planet not found" };
         return;
       }
-    
+
       const getImageUrl = (img: any) => {
         if (!img) return null;
-        if (typeof img === 'string') return img;
+        if (typeof img === "string") return img;
         if (img.url) return img.url;
         return img?.data?.attributes?.url ?? null;
       };
-    
+
       const characters = Array.isArray(entity.characters)
         ? entity.characters.map((c: any) => ({
             id: c.uid ?? c.id,
@@ -106,7 +106,7 @@ export default factories.createCoreController(
             deletedAt: c.deletedAt ?? null,
           }))
         : [];
-    
+
       ctx.body = {
         id: entity.uid ?? entity.id,
         name: entity.name,
@@ -116,6 +116,91 @@ export default factories.createCoreController(
         deletedAt: entity.deletedAt ?? null,
         characters,
       };
-    }    
+    },
+
+    // Expose the original/core behavior explicitly
+    async originalFind(ctx) {
+      const query = ctx.query as Record<string, any>;
+      const page = Number(query.page) || 1;
+      const limit = Number(query.limit) || 10;
+      const start = (page - 1) * limit;
+
+      let populate: any = undefined;
+      if (query.populate) {
+        if (typeof query.populate === "string") {
+          populate = query.populate.includes(",")
+            ? query.populate.split(",").map((s: string) => s.trim())
+            : query.populate;
+        } else {
+          populate = query.populate;
+        }
+      }
+
+      const [entities, total] = await Promise.all([
+        strapi.entityService.findMany("api::planet.planet", {
+          start,
+          limit,
+          sort: { uid: "asc" },
+          populate,
+        }),
+        strapi.db.query("api::planet.planet").count(),
+      ]);
+
+      const totalPages = Math.ceil(total / (limit || total));
+
+      ctx.body = {
+        data: entities,
+        meta: {
+          pagination: {
+            page,
+            pageSize: limit,
+            pageCount: totalPages,
+            total,
+          },
+        },
+      };
+    },
+
+    async originalFindOne(ctx) {
+      const { id } = ctx.params as { id: string };
+      const query = ctx.query as Record<string, any>;
+
+      let populate: any = undefined;
+      if (query.populate) {
+        if (typeof query.populate === "string") {
+          populate = query.populate.includes(",")
+            ? query.populate.split(",").map((s: string) => s.trim())
+            : query.populate;
+        } else {
+          populate = query.populate;
+        }
+      }
+
+      const numericId = Number(id);
+      const orFilters: any[] = [{ documentId: id }];
+      if (Number.isFinite(numericId)) {
+        orFilters.push({ uid: numericId });
+        orFilters.push({ id: numericId });
+      }
+
+      const results = await strapi.entityService.findMany(
+        "api::planet.planet",
+        {
+          filters: { $or: orFilters },
+          populate,
+          limit: 1,
+        }
+      );
+
+      const entity = results[0] ?? null;
+
+      if (!entity) {
+        ctx.status = 404;
+        ctx.body = { message: "Planet not found" };
+        return;
+      }
+
+      ctx.body = { data: entity };
+    },
   })
 );
