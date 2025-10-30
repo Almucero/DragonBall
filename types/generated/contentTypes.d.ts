@@ -467,6 +467,149 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCharacterCharacter extends Struct.CollectionTypeSchema {
+  collectionName: 'characters';
+  info: {
+    displayName: 'character';
+    pluralName: 'characters';
+    singularName: 'character';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    affiliation: Schema.Attribute.Enumeration<
+      [
+        'Z Fighter',
+        'Red Ribbon Army',
+        'Namekian Warrior',
+        'Freelancer',
+        'Army of Frieza',
+        'Other',
+        'Pride Troopers',
+        'Assistant of Vermoud',
+        'Assistant of Beerus',
+        'Villain',
+      ]
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deletedAt: Schema.Attribute.DateTime;
+    description: Schema.Attribute.Text;
+    gender: Schema.Attribute.Enumeration<
+      ['Male', 'Female', 'Other', 'Unknown']
+    >;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    ki: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::character.character'
+    > &
+      Schema.Attribute.Private;
+    maxKi: Schema.Attribute.String;
+    name: Schema.Attribute.String;
+    originPlanet: Schema.Attribute.Relation<'oneToOne', 'api::planet.planet'>;
+    publishedAt: Schema.Attribute.DateTime;
+    race: Schema.Attribute.Enumeration<
+      [
+        'Saiyan',
+        'Namekian',
+        'Human',
+        'Majin',
+        'Frieza Race',
+        'Jiren Race',
+        'Android',
+        'God',
+        'Angel',
+        'Evil',
+        'Unknown',
+        'Nucleico benigno',
+        'Nucleico',
+      ]
+    >;
+    uid: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPlanetPlanet extends Struct.CollectionTypeSchema {
+  collectionName: 'planets';
+  info: {
+    displayName: 'planet';
+    pluralName: 'planets';
+    singularName: 'planet';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    characters: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::character.character'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deletedAt: Schema.Attribute.DateTime;
+    description: Schema.Attribute.Text;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    isDestroyed: Schema.Attribute.Boolean;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::planet.planet'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    uid: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTransformationTransformation
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'transformations';
+  info: {
+    displayName: 'transformation';
+    pluralName: 'transformations';
+    singularName: 'transformation';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    character: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::character.character'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deletedAt: Schema.Attribute.DateTime;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    ki: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::transformation.transformation'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    uid: Schema.Attribute.Integer;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -978,6 +1121,9 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::character.character': ApiCharacterCharacter;
+      'api::planet.planet': ApiPlanetPlanet;
+      'api::transformation.transformation': ApiTransformationTransformation;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

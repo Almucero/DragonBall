@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "planets",
+  "info": {
+    "singularName": "planet",
+    "pluralName": "planets",
+    "displayName": "planet"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "uid": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "isDestroyed": {
+      "type": "boolean"
+    },
+    "description": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "deletedAt": {
+      "type": "datetime"
+    },
+    "characters": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::character.character"
+    }
+  }
+}
