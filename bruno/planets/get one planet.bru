@@ -1,15 +1,16 @@
 meta {
-  name: get transformations
+  name: get one planet
   type: http
-  seq: 5
+  seq: 2
 }
 
 get {
-  url: http://localhost:1337/api/transformations
+  url: http://localhost:1337/api/planets/1
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

@@ -529,6 +529,10 @@ export interface ApiCharacterCharacter extends Struct.CollectionTypeSchema {
         'Nucleico',
       ]
     >;
+    transformations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::transformation.transformation'
+    >;
     uid: Schema.Attribute.Integer;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

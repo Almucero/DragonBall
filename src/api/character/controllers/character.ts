@@ -1,10 +1,12 @@
-/**
+/*
  * character controller (original)
- *
- *
- * import { factories } from '@strapi/strapi'
- *
- * export default factories.createCoreController('api::character.character');
+ */
+// import { factories } from '@strapi/strapi'
+
+// export default factories.createCoreController('api::character.character');
+
+/*
+ * character controller (modificado)
  */
 import { factories } from "@strapi/strapi";
 
@@ -73,19 +75,49 @@ export default factories.createCoreController(
 
     async rawOne(ctx) {
       const { id } = ctx.params as { id: string };
-
-      // Buscar por el atributo uid en vez del ID interno
+    
+      // Buscar el personaje por uid
       const entity = await strapi.db.query("api::character.character").findOne({
-        where: { uid: Number(id) }, // convertir a número si uid es number
-        populate: ["image", "originPlanet"],
+        where: { uid: Number(id) },
+        populate: {
+          image: true,
+          originPlanet: { populate: ["image"] },
+          transformations: { populate: ["image"] },
+        },
       });
-
+    
       if (!entity) {
         ctx.status = 404;
         ctx.body = { message: "Character not found" };
         return;
       }
-
+    
+      const getImageUrl = (img: any) =>
+        img?.url || img?.data?.attributes?.url || null;
+    
+      // Formatear el planeta de origen
+      const planet = entity.originPlanet
+        ? {
+            id: entity.originPlanet.uid ?? entity.originPlanet.id,
+            name: entity.originPlanet.name,
+            isDestroyed: entity.originPlanet.isDestroyed,
+            description: entity.originPlanet.description,
+            image: getImageUrl(entity.originPlanet.image),
+            deletedAt: entity.originPlanet.deletedAt ?? null,
+          }
+        : null;
+    
+      // Formatear las transformaciones
+      const transformations = Array.isArray(entity.transformations)
+        ? entity.transformations.map((t: any) => ({
+            id: t.uid ?? t.id,
+            name: t.name,
+            image: getImageUrl(t.image),
+            ki: t.ki,
+            deletedAt: t.deletedAt ?? null,
+          }))
+        : [];
+    
       ctx.body = {
         id: entity.uid,
         name: entity.name,
@@ -97,10 +129,9 @@ export default factories.createCoreController(
         image: getImageUrl(entity.image),
         affiliation: entity.affiliation,
         deletedAt: entity.deletedAt ?? null,
+        originPlanet: planet,
+        transformations,
       };
-    },
+    }    
   })
 );
-
-//total items da más items
-//comprobar si se devuelve origin planet y transformations

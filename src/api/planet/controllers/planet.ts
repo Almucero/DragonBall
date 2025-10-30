@@ -1,10 +1,13 @@
 /**
  * planet controller (original)
- * 
- * import { factories } from '@strapi/strapi'
- * 
- * export default factories.createCoreController('api::planet.planet');
- */
+ */ 
+// import { factories } from '@strapi/strapi'
+
+// export default factories.createCoreController('api::planet.planet');
+
+/**
+ * planet controller (modificado)
+ */ 
 import { factories } from "@strapi/strapi";
 
 const getImageUrl = (image: any) => {
@@ -67,25 +70,52 @@ export default factories.createCoreController(
 
     async rawOne(ctx) {
       const { id } = ctx.params as { id: string };
-
-      const entity = await strapi.db.query("api::planet.planet").findOne({
+    
+      const entity = await strapi.db.query('api::planet.planet').findOne({
         where: { uid: Number(id) },
+        populate: {
+          image: true,
+          characters: { populate: ['image'] },
+        },
       });
-
+    
       if (!entity) {
         ctx.status = 404;
-        ctx.body = { message: "Planet not found" };
+        ctx.body = { message: 'Planet not found' };
         return;
       }
-
+    
+      const getImageUrl = (img: any) => {
+        if (!img) return null;
+        if (typeof img === 'string') return img;
+        if (img.url) return img.url;
+        return img?.data?.attributes?.url ?? null;
+      };
+    
+      const characters = Array.isArray(entity.characters)
+        ? entity.characters.map((c: any) => ({
+            id: c.uid ?? c.id,
+            name: c.name,
+            ki: c.ki,
+            maxKi: c.maxKi,
+            race: c.race,
+            gender: c.gender,
+            description: c.description,
+            image: getImageUrl(c.image),
+            affiliation: c.affiliation,
+            deletedAt: c.deletedAt ?? null,
+          }))
+        : [];
+    
       ctx.body = {
-        id: entity.uid,
+        id: entity.uid ?? entity.id,
         name: entity.name,
         isDestroyed: entity.isDestroyed,
         description: entity.description,
         image: getImageUrl(entity.image),
         deletedAt: entity.deletedAt ?? null,
+        characters,
       };
-    },
+    }    
   })
 );

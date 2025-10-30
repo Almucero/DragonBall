@@ -1,15 +1,16 @@
 meta {
-  name: get one planet
+  name: get planets
   type: http
-  seq: 4
+  seq: 1
 }
 
 get {
-  url: http://localhost:1337/api/planets/1
+  url: http://localhost:1337/api/planets
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

@@ -85,6 +85,11 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::planet.planet"
+    },
+    "transformations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::transformation.transformation"
     }
   }
 }

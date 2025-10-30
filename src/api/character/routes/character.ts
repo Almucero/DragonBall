@@ -1,10 +1,12 @@
-/**
+/*
  * character router (original)
- *
- *
- * import { factories } from '@strapi/strapi';
- *
- * export default factories.createCoreRouter('api::character.character');
+ */
+// import { factories } from '@strapi/strapi';
+
+// export default factories.createCoreRouter('api::character.character');
+
+/*
+ * character router (modificado)
  */
 module.exports = {
   routes: [

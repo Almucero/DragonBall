@@ -1,9 +1,12 @@
 /**
  * planet router (original)
- * 
- * import { factories } from '@strapi/strapi';
- * 
- * export default factories.createCoreRouter('api::planet.planet');
+ */
+// import { factories } from '@strapi/strapi';
+ 
+// export default factories.createCoreRouter('api::planet.planet');
+
+/**
+ * planet router (modificado)
  */
 module.exports = {
   routes: [
