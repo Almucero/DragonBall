@@ -1,0 +1,15 @@
+meta {
+  name: login
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:1337/auth/local
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
